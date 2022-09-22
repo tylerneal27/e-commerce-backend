@@ -1,7 +1,7 @@
-import { STRING } from 'sequelize';
+import sequelize from '../config/connection.js';
 import { Model, DataTypes } from 'sequelize';
 
-import sequelize from '../config/connection.js';
+
 
 class Category extends Model {}
 
