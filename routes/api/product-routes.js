@@ -1,6 +1,5 @@
 import express from 'express';
 import { Product, Category, Tag, ProductTag } from '../../models/index.js';
-import { Op } from 'sequelize'
 
 const router = express.Router();
 
@@ -117,7 +116,7 @@ router.delete('/:id', (req, res) => {
       return tag.product_tag.id
     });
     return Promise.all ([
-      ProductTag.destroy({where: {id: {[Op.in]: productTagIds}}}),
+      ProductTag.destroy({where: {id: productTagIds}}),
       product.destroy()
     ]);
   }).then((product) => res.status(200).json(product))
