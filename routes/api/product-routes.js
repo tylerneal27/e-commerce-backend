@@ -1,5 +1,6 @@
 import express from 'express';
 import { Product, Category, Tag, ProductTag } from '../../models/index.js';
+import { Op } from 'sequelize'
 
 const router = express.Router();
 
@@ -9,12 +10,25 @@ const router = express.Router();
 router.get('/', (req, res) => {
   // find all products
   // be sure to include its associated Category and Tag data
+  Product.findAll({
+    include: [Category, Tag]
+  }).then((products) => res.json(products))
+
+  .catch((error) => res.status(400).json(error))
 });
 
 // get one product
 router.get('/:id', (req, res) => {
   // find a single product by its `id`
   // be sure to include its associated Category and Tag data
+  Product.findOne({
+    where: {
+      id: req.params.id
+    },
+    include: [Category, Tag]
+  }).then((products) => res.json(products))
+
+  .catch((error) => res.status(400).json(error))
 });
 
 // create new product
@@ -57,7 +71,7 @@ router.put('/:id', (req, res) => {
       id: req.params.id,
     },
   })
-    .then((product) => {
+    .then((_product) => {
       // find all associated tags from ProductTag
       return ProductTag.findAll({ where: { product_id: req.params.id } });
     })
@@ -92,7 +106,22 @@ router.put('/:id', (req, res) => {
 });
 
 router.delete('/:id', (req, res) => {
-  // delete one product by its `id` value
+  
+  Product.findOne({
+    where: {
+      id: req.params.id
+    },
+    include: [Tag]
+  }).then((product) => {
+    const productTagIds = product.tags.map( (tag) => {
+      return tag.product_tag.id
+    });
+    return Promise.all ([
+      ProductTag.destroy({where: {id: {[Op.in]: productTagIds}}}),
+      product.destroy()
+    ]);
+  }).then((product) => res.status(200).json(product))
+  .catch((error) => res.status(400).json(error))
 });
 
 export default router;

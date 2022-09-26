@@ -4,7 +4,7 @@ import { Category, Product } from '../../models/index.js';
 const router = express.Router();
 
 // The `/api/categories` endpoint
-router.get('/', (req, res) => {
+router.get('/', (_req, res) => {
   // find all categories
   Category.findAll({
     include: [Product]
